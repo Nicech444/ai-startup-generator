@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-генератор ідей стартапів</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        h1 { font-size: 26px; text-align: center; margin-bottom: 8px; color: #38bdf8; }
+        .subtitle { text-align: center; color: #94a3b8; margin-bottom: 24px; font-size: 15px; }
+        .presets { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; }
+        .preset-btn {
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #475569;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .preset-btn:hover { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+        .form-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #fff;
+            font-size: 15px;
+        }
+        input[type="text"]:focus { outline: none; border-color: #38bdf8; }
+        button[type="submit"] {
+            background: linear-gradient(90deg, #0284c7, #6366f1);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button[type="submit"]:hover { opacity: 0.9; }
+        .error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid #38bdf8;
+            border-radius: 14px;
+            padding: 24px;
+            margin-top: 10px;
+            animation: fadeIn 0.4s ease;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .card h2 { font-size: 24px; color: #ffffff; margin-bottom: 6px; }
+        .slogan { font-style: italic; color: #a5b4fc; font-size: 16px; margin-bottom: 16px; }
+        .field { margin-bottom: 12px; line-height: 1.5; font-size: 14.5px; color: #e2e8f0; }
+        .field strong { color: #38bdf8; }
+        .loader { display: none; text-align: center; color: #38bdf8; margin: 15px 0; font-size: 14px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 AI-генератор ідей стартапів</h1>
+        <p class="subtitle">Оберіть готову галузь або введіть власну тему — ШІ згенерує концепт проєкту</p>
+
+        <div class="presets">
+            <button type="button" class="preset-btn" onclick="setTopic('Освіта та навчання')">🎓 Освіта</button>
+            <button type="button" class="preset-btn" onclick="setTopic('Здоров’я та фітнес')">💪 Здоров’я</button>
+            <button type="button" class="preset-btn" onclick="setTopic('Відеоігри та кіберспорт')">🎮 Ігри</button>
+            <button type="button" class="preset-btn" onclick="setTopic('Екологія та розумне місто')">🌱 Екологія</button>
+            <button type="button" class="preset-btn" onclick="setTopic('Кібербезпека')">🔐 Кібербезпека</button>
+        </div>
+
+        <form method="POST" onsubmit="document.getElementById('loader').style.display='block'">
+            <div class="form-group">
+                <input type="text" id="topicInput" name="topic" placeholder="Наприклад: розумний дім або туризм..." value="{{ topic }}" required>
+                <button type="submit">Згенерувати</button>
+            </div>
+        </form>
+
+        <div id="loader" class="loader">⏳ ШІ генерує бізнес-модель, назву та слоган...</div>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if startup %}
+            <div class="card">
+                <span class="badge">Галузь: {{ topic }}</span>
+                <h2>{{ startup.name }}</h2>
+                <div class="slogan">«{{ startup.slogan }}»</div>
+                <div class="field"><strong>💡 Суть ідеї:</strong> {{ startup.description }}</div>
+                <div class="field"><strong>🎯 Цільова аудиторія:</strong> {{ startup.audience }}</div>
+                <div class="field"><strong>💰 Монетизація:</strong> {{ startup.monetization }}</div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function setTopic(text) {
+            document.getElementById('topicInput').value = text;
+        }
+    </script>
+</body>
+</html>
